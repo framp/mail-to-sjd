@@ -1,11 +1,11 @@
 {
-  "name": "mail-to-sjd-expenses",
+  "name": "mail-to-sjd",
   "version": "1.0.0",
   "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "googleapis": "^39.2.0",
     "mailparser": "^3.0.0",
