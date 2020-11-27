@@ -10,7 +10,10 @@ This is not a tool to use out of the box but something you should customize writ
 
 - Set up a GMail application following [these instructions](https://developers.google.com/gmail/api/quickstart/nodejs)
 - Copy credentials.json in this directory
-- Configure the email patterns and how to process them in main.js
+- `echo '[]' > processed.json`
+- Configure the email patterns in patterns.json, eg:
+- `echo '{"paypal-invoice": "from:(service@paypal.co.uk) subject:(You've got money) before:{DATE}"}' > patterns.json`
+- Configure how to process the emails in `main.js`
 - `npm install`
 - `npm start`
 

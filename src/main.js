@@ -1,7 +1,7 @@
 const fs = require("./fs");
 const { getOAuthClient, getEmails } = require("./gmail");
 const { getXRates } = require("./forex");
-const { PROCESSED_PATH } = require("./const");
+const { PROCESSED_PATH, PATTERNS_PATH } = require("./const");
 
 const DONE = 1;
 const ERROR = 0;
@@ -38,15 +38,9 @@ const processPaypalInvoice = async ({ id, date, html }) => {
   return DONE;
 };
 
-const patterns = {
-  "paypal-invoice":
-    "from:(service@paypal.co.uk) to:(frampone+paypalbiz@gmail.com) subject:(You've got money) before:{DATE}",
-  //"paypal-expense":
-  //  "from:(service@paypal.co.uk) to:(frampone+paypalbiz@gmail.com) subject:(Receipt for your payment) before:{DATE}",
-};
-
 (async () => {
   const processed = JSON.parse(await fs.readFile(PROCESSED_PATH));
+  const patterns = JSON.parse(await fs.readFile(PATTERNS_PATH));
   const auth = await getOAuthClient();
   const emails = await getEmails(auth, patterns, processed);
 
