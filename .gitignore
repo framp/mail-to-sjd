@@ -1,0 +1,6 @@
+node_modules
+data
+credentials.json
+token.json
+processed.json
+.DS_Store
