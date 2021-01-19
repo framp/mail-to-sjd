@@ -2,6 +2,7 @@ const util = require("util");
 const readline = require("readline");
 const { google } = require("googleapis");
 const parseEmail = require("mailparser").simpleParser;
+const puppeteer = require("puppeteer");
 const fs = require("./fs");
 const { SCOPES, TOKEN_PATH } = require("./const");
 
@@ -72,7 +73,16 @@ const getEmails = async (auth, patterns, processed) => {
   return results;
 };
 
+const renderEmail = async (html) => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(html);
+  await page.pdf({ path: "expense.pdf", format: "A4" });
+  await browser.close();
+};
+
 module.exports = {
   getOAuthClient,
   getEmails,
+  renderEmail,
 };

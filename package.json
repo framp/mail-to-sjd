@@ -9,6 +9,7 @@
   "dependencies": {
     "googleapis": "^39.2.0",
     "mailparser": "^3.0.0",
+    "puppeteer": "^5.5.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   }

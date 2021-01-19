@@ -11,6 +11,8 @@ This is not a tool to use out of the box but something you should customize writ
 - Set up a GMail application following [these instructions](https://developers.google.com/gmail/api/quickstart/nodejs)
 - Copy credentials.json in this directory
 - `echo '[]' > processed.json`
+- Setup your sjd credentials
+- `echo '{ "username": "", "password": "..." }' > sjd.json`
 - Configure the email patterns in patterns.json, eg:
 - `echo '{"paypal-invoice": "from:(service@paypal.co.uk) subject:(You've got money) before:{DATE}"}' > patterns.json`
 - Configure how to process the emails in `main.js`
@@ -19,8 +21,5 @@ This is not a tool to use out of the box but something you should customize writ
 
 # Personal TODOs
 
-- Generate PDFs of HTML emails to attach as receipts
-- Make requests to create invoices and expenses on SJD
 - Implement invoice creation from Stripe
-- Implement expenses creation from Paypal
 - Paginate through GMail emails, if needed

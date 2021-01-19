@@ -1,6 +1,8 @@
 const fs = require("./fs");
 const { getOAuthClient, getEmails } = require("./gmail");
+const makeSjd = require("./sjd");
 const { getXRates } = require("./forex");
+const sjdCredentials = require("../sjd");
 const { PROCESSED_PATH, PATTERNS_PATH } = require("./const");
 
 const DONE = 1;
@@ -29,12 +31,27 @@ const processPaypalInvoice = async ({ id, date, html }) => {
   }
 
   const xrates = await getXRates(date, "GBP", "USD");
+  const receivedGBP = received / xrates / 100;
+  const flooredReceivedGBP = Math.floor(received / xrates) / 100;
+  const feeGBP = fee / xrates / 100;
   console.log({
     date,
-    received: received / xrates / 100,
-    fee: fee / xrates / 100,
+    received: receivedGBP,
+    fee: feeGBP,
     rate: xrates,
   });
+  const { login, createInvoice, createExpense } = await makeSjd();
+  await login(sjdCredentials);
+  await createInvoice({ date, amount: flooredReceivedGBP, customerId: 24874 });
+  console.log("Created invoice");
+  await createExpense({
+    date,
+    amount: feeGBP,
+    typeId: 56,
+    name: "paypal fees",
+    html,
+  });
+  console.log("Created expense");
   return DONE;
 };
 
@@ -51,5 +68,8 @@ const processPaypalInvoice = async ({ id, date, html }) => {
     }
   }
   processed.sort();
-  await fs.writeFile(PROCESSED_PATH, JSON.stringify([...new Set(processed)]));
+  await fs.writeFile(
+    PROCESSED_PATH,
+    JSON.stringify([...new Set(processed)], null, "\t")
+  );
 })();

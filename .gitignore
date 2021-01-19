@@ -4,4 +4,5 @@ credentials.json
 token.json
 processed.json
 patterns.json
+sjd.json
 .DS_Store
