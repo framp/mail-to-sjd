@@ -2,14 +2,13 @@ const fs = require("./fs");
 const { getOAuthClient, getEmails } = require("./gmail");
 const makeSjd = require("./sjd");
 const { getXRates } = require("./forex");
-const sjdCredentials = require("../sjd");
-const { PROCESSED_PATH, PATTERNS_PATH } = require("./const");
+const { PROCESSED_PATH, PATTERNS_PATH, SJD_PATH } = require("./const");
 
 const DONE = 1;
 const ERROR = 0;
 const SKIPPED = -1;
 
-const processPaypalInvoice = async ({ id, date, html }) => {
+const processPaypalInvoice = async ({ id, date, html }, sjdCredentials) => {
   if (!html.match("R Software Inc. sent you")) {
     console.log(
       `${id} ${date.toISOString()}: Not an invoice from R Software, skipping`
@@ -35,6 +34,7 @@ const processPaypalInvoice = async ({ id, date, html }) => {
   const flooredReceivedGBP = Math.floor(received / xrates) / 100;
   const feeGBP = fee / xrates / 100;
   console.log({
+    id,
     date,
     received: receivedGBP,
     fee: feeGBP,
@@ -56,13 +56,17 @@ const processPaypalInvoice = async ({ id, date, html }) => {
 };
 
 (async () => {
+  if (!(await fs.exists(PROCESSED_PATH))) {
+    fs.writeFile(PROCESSED_PATH, "[]");
+  }
   const processed = JSON.parse(await fs.readFile(PROCESSED_PATH));
   const patterns = JSON.parse(await fs.readFile(PATTERNS_PATH));
+  const sjdCredentials = JSON.parse(await fs.readFile(SJD_PATH));
   const auth = await getOAuthClient();
   const emails = await getEmails(auth, patterns, processed);
 
   for (const email of emails["paypal-invoice"]) {
-    const result = await processPaypalInvoice(email);
+    const result = await processPaypalInvoice(email, sjdCredentials);
     if ([DONE, SKIPPED].includes(result)) {
       processed.push(email.id);
     }
@@ -72,4 +76,5 @@ const processPaypalInvoice = async ({ id, date, html }) => {
     PROCESSED_PATH,
     JSON.stringify([...new Set(processed)], null, "\t")
   );
+  process.exit(0);
 })();

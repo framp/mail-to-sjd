@@ -2,12 +2,11 @@ const util = require("util");
 const readline = require("readline");
 const { google } = require("googleapis");
 const parseEmail = require("mailparser").simpleParser;
-const puppeteer = require("puppeteer");
 const fs = require("./fs");
-const { SCOPES, TOKEN_PATH } = require("./const");
+const { SCOPES, CREDENTIALS_PATH, TOKEN_PATH } = require("./const");
 
 const getOAuthClient = async () => {
-  const credentialsContent = await fs.readFile("credentials.json");
+  const credentialsContent = await fs.readFile(CREDENTIALS_PATH);
   const credentials = JSON.parse(credentialsContent);
   const { client_secret, client_id, redirect_uris } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
@@ -54,11 +53,18 @@ const getEmails = async (auth, patterns, processed) => {
   const results = {};
   for (const pattern of Object.keys(patterns)) {
     const filledPattern = fillPattern(patterns[pattern]);
-    const res = await google
-      .gmail("v1")
-      .users.messages.list({ userId: "me", q: filledPattern });
+    let messageIds = [];
+    let res = null;
+    do {
+      res = await google.gmail("v1").users.messages.list({
+        userId: "me",
+        q: filledPattern,
+        pageToken: res && res.data.nextPageToken,
+      });
+      messageIds.push(...res.data.messages.map(({ id }) => id));
+    } while (res.data.nextPageToken);
     const emails = [];
-    for (const { id } of res.data.messages) {
+    for (const id of messageIds) {
       if (processed.includes(id)) continue;
       const res = await google
         .gmail("v1")
@@ -73,16 +79,7 @@ const getEmails = async (auth, patterns, processed) => {
   return results;
 };
 
-const renderEmail = async (html) => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setContent(html);
-  await page.pdf({ path: "expense.pdf", format: "A4" });
-  await browser.close();
-};
-
 module.exports = {
   getOAuthClient,
   getEmails,
-  renderEmail,
 };

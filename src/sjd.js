@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const fs = require("./fs");
 
 const renderPDF = (browser) => async (html, path) => {
   const page = await browser.newPage();
@@ -95,7 +96,7 @@ const createExpense = (browser) => async ({
 };
 
 module.exports = async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch();
   return {
     login: login(browser),
     createInvoice: createInvoice(browser),
