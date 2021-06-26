@@ -61,7 +61,7 @@ const getEmails = async (auth, patterns, processed) => {
         q: filledPattern,
         pageToken: res && res.data.nextPageToken,
       });
-      messageIds.push(...res.data.messages.map(({ id }) => id));
+      messageIds.push(...(res.data.messages || []).map(({ id }) => id));
     } while (res.data.nextPageToken);
     const emails = [];
     for (const id of messageIds) {
